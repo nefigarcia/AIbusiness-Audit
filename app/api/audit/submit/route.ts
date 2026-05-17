@@ -109,7 +109,14 @@ export async function POST(req: NextRequest) {
   }
 
   if (emailResult.status === "rejected") {
-    console.error("Confirmation email failed:", emailResult.reason);
+    const err = emailResult.reason;
+    console.error("[Resend] Confirmation email failed:", {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+      raw: JSON.stringify(err),
+    });
+  } else {
+    console.log("[Resend] Confirmation email result:", JSON.stringify(emailResult.value));
   }
 
   return NextResponse.json({
