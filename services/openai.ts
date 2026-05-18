@@ -89,6 +89,8 @@ The qualificationScore (0-100) reflects how strong an automation opportunity thi
 
 Be specific and concrete. Reference details from the actual transcript.`;
 
+  const key = process.env.OPENAI_API_KEY ?? "";
+  console.log("[OpenAI] model: gpt-3.5-turbo | key prefix:", key.slice(0, 10));
   const response = await getClient().chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
