@@ -7,10 +7,10 @@ function getResend() {
 }
 
 function getFrom() {
-  return `${process.env.RESEND_FROM_NAME ?? "Auriva AI"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@aurivaai.com"}>`;
+  return `${process.env.RESEND_FROM_NAME ?? "Auriva AI"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@auriva.com"}>`;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://aurivaai.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://auriva.im";
 
 export async function sendAuditConfirmation(params: {
   toEmail: string;
