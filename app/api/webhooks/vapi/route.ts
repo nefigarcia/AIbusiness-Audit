@@ -15,12 +15,15 @@ export async function POST(req: NextRequest) {
 
   const parsed = vapiWebhookSchema.safeParse(body);
   if (!parsed.success) {
+    console.warn("[VAPI webhook] Failed to parse body:", JSON.stringify(body).slice(0, 500));
     return NextResponse.json({ received: true });
   }
 
   const { type, call } = parsed.data;
+  console.log("[VAPI webhook] type:", type, "call.id:", call?.id);
 
   if (!call?.id) {
+    console.warn("[VAPI webhook] No call.id in payload");
     return NextResponse.json({ received: true });
   }
 
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
   });
 
   if (!session) {
-    console.warn(`No session found for VAPI call: ${call.id}`);
+    console.warn(`[VAPI webhook] No session found for vapiCallId: ${call.id}`);
     return NextResponse.json({ received: true });
   }
 
@@ -53,6 +56,7 @@ export async function POST(req: NextRequest) {
         call.artifact?.transcript ?? call.transcript ?? "";
       const duration = call.duration ?? null;
       const recordingUrl = call.artifact?.recordingUrl ?? call.recordingUrl ?? null;
+      console.log("[VAPI webhook] call-ended — transcript length:", transcript.length, "duration:", duration, "hasRecording:", !!recordingUrl);
 
       await prisma.auditSession.update({
         where: { id: session.id },
