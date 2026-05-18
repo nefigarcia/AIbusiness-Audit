@@ -1,9 +1,11 @@
-import OpenAI from "openai";
+import { genkit } from "genkit";
+import { googleAI } from "@genkit-ai/googleai";
 import type { AnalysisResult } from "@/types";
 
-function getClient() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-}
+const ai = genkit({
+  plugins: [googleAI()],
+  model: "googleai/gemini-2.5-flash",
+});
 
 const SYSTEM_PROMPT = `You are a senior AI business consultant at Auriva AI, specializing in workflow automation and operational efficiency. Your role is to analyze business interview transcripts and generate comprehensive, actionable AI optimization reports.
 
@@ -89,23 +91,16 @@ The qualificationScore (0-100) reflects how strong an automation opportunity thi
 
 Be specific and concrete. Reference details from the actual transcript.`;
 
-  const key = process.env.OPENAI_API_KEY ?? "";
-  console.log("[OpenAI] model: gpt-3.5-turbo | key prefix:", key.slice(0, 10));
-  const response = await getClient().chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: userPrompt },
-    ],
-    response_format: { type: "json_object" },
-    temperature: 0.3,
-    max_tokens: 4000,
+  const result = await ai.generate({
+    system: SYSTEM_PROMPT,
+    prompt: userPrompt,
+    output: { format: "json" },
   });
 
-  const content = response.choices[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned empty response");
+  const content = result.output ?? (result.text ? JSON.parse(result.text) : null);
+  if (!content) throw new Error("Gemini returned empty response");
 
-  return JSON.parse(content) as AnalysisResult;
+  return content as AnalysisResult;
 }
 
 export async function generateReportHTML(
@@ -172,7 +167,7 @@ export async function generateReportHTML(
     <!-- Header -->
     <div style="text-align:center;margin-bottom:40px;">
       <div style="background:linear-gradient(135deg,#7c3aed,#2563eb);display:inline-block;padding:12px 28px;border-radius:8px;margin-bottom:20px;">
-        <span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:0.5px;">ROSYS AI</span>
+        <span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:0.5px;">AURIVA AI</span>
       </div>
       <h1 style="color:#e2e8f0;font-size:28px;font-weight:700;margin:0 0 8px;">AI Optimization Report</h1>
       <p style="color:#64748b;font-size:15px;margin:0;">${businessName} · Prepared for ${leadName}</p>
