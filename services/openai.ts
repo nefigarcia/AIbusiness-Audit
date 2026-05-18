@@ -90,7 +90,7 @@ The qualificationScore (0-100) reflects how strong an automation opportunity thi
 Be specific and concrete. Reference details from the actual transcript.`;
 
   const response = await getClient().chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-3.5-turbo",
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: userPrompt },
