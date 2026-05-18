@@ -31,31 +31,29 @@ export const auditFormSchema = z.object({
 
 export type AuditFormInput = z.infer<typeof auditFormSchema>;
 
+const vapiCallObject = z.object({
+  id: z.string(),
+  status: z.string().optional(),
+  transcript: z.string().optional(),
+  summary: z.string().optional(),
+  endedReason: z.string().optional(),
+  duration: z.number().optional(),
+  recordingUrl: z.string().optional(),
+});
+
+const vapiArtifact = z.object({
+  transcript: z.string().optional(),
+  recordingUrl: z.string().optional(),
+});
+
 export const vapiWebhookSchema = z.object({
-  type: z.string(),
-  call: z
-    .object({
-      id: z.string(),
-      status: z.string().optional(),
-      transcript: z.string().optional(),
-      summary: z.string().optional(),
-      endedReason: z.string().optional(),
-      duration: z.number().optional(),
-      recordingUrl: z.string().optional(),
-      artifact: z
-        .object({
-          transcript: z.string().optional(),
-          recordingUrl: z.string().optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-  message: z
-    .object({
-      type: z.string().optional(),
-      transcript: z.string().optional(),
-    })
-    .optional(),
+  message: z.object({
+    type: z.string(),
+    call: vapiCallObject.optional(),
+    artifact: vapiArtifact.optional(),
+    summary: z.string().optional(),
+    transcript: z.string().optional(),
+  }),
 });
 
 export const reportGenerateSchema = z.object({

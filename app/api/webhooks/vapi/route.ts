@@ -19,11 +19,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  const { type, call } = parsed.data;
+  const { type, call, artifact } = parsed.data.message;
   console.log("[VAPI webhook] type:", type, "call.id:", call?.id);
 
   if (!call?.id) {
-    console.warn("[VAPI webhook] No call.id in payload");
+    console.warn("[VAPI webhook] No call.id in payload for type:", type);
     return NextResponse.json({ received: true });
   }
 
@@ -50,12 +50,12 @@ export async function POST(req: NextRequest) {
       });
       break;
 
+    case "end-of-call-report":
     case "call.ended":
     case "call-ended": {
-      const transcript =
-        call.artifact?.transcript ?? call.transcript ?? "";
+      const transcript = artifact?.transcript ?? call.transcript ?? "";
       const duration = call.duration ?? null;
-      const recordingUrl = call.artifact?.recordingUrl ?? call.recordingUrl ?? null;
+      const recordingUrl = artifact?.recordingUrl ?? call.recordingUrl ?? null;
       console.log("[VAPI webhook] call-ended — transcript length:", transcript.length, "duration:", duration, "hasRecording:", !!recordingUrl);
 
       await prisma.auditSession.update({
@@ -78,13 +78,13 @@ export async function POST(req: NextRequest) {
           create: {
             sessionId: session.id,
             rawTranscript: transcript,
-            summary: call.summary ?? null,
+            summary: parsed.data.message.summary ?? call.summary ?? null,
             callDuration: duration,
             recordingUrl,
           },
           update: {
             rawTranscript: transcript,
-            summary: call.summary ?? null,
+            summary: parsed.data.message.summary ?? call.summary ?? null,
             callDuration: duration,
             recordingUrl,
           },
