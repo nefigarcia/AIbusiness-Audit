@@ -7,7 +7,7 @@ function getResend() {
 }
 
 function getFrom() {
-  return `${process.env.RESEND_FROM_NAME ?? "Auriva AI"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@auriva.com"}>`;
+  return `${process.env.RESEND_FROM_NAME ?? "Auriva AI"} <${process.env.RESEND_FROM_EMAIL ?? "noreply@auriva.im"}>`;
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://auriva.im";
