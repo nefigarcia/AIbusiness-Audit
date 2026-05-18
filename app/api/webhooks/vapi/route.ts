@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { vapiWebhookSchema } from "@/lib/validations";
 
+export const maxDuration = 90;
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
 const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET ?? "";
 
@@ -98,15 +100,21 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Trigger async AI report generation
-        fetch(`${APP_URL}/api/reports/generate`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            sessionId: session.id,
-            internalSecret: INTERNAL_SECRET,
-          }),
-        }).catch((err) => console.error("Failed to trigger report generation:", err));
+        // Trigger report generation — awaited so Vercel doesn't kill it before it starts
+        console.log("[VAPI webhook] Triggering report generation for session:", session.id, "url:", `${APP_URL}/api/reports/generate`);
+        try {
+          const reportRes = await fetch(`${APP_URL}/api/reports/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sessionId: session.id,
+              internalSecret: INTERNAL_SECRET,
+            }),
+          });
+          console.log("[VAPI webhook] Report generation response:", reportRes.status);
+        } catch (err) {
+          console.error("[VAPI webhook] Failed to trigger report generation:", err);
+        }
       }
       break;
     }
