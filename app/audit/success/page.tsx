@@ -75,6 +75,11 @@ export default function AuditSuccessPage() {
           ))}
         </div>
 
+        <div className="flex items-center justify-center gap-2 text-amber-400/80 bg-amber-400/8 border border-amber-400/20 rounded-xl px-4 py-3 mb-6 text-sm">
+          <Mail className="w-4 h-4 flex-shrink-0" />
+          <span>Can&apos;t find the confirmation email? Check your <span className="font-semibold">spam or junk folder</span> and mark it as not spam.</span>
+        </div>
+
         <Button variant="secondary" size="lg" asChild>
           <Link href="/">Back to Home</Link>
         </Button>
