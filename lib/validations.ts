@@ -25,8 +25,7 @@ export const auditFormSchema = z.object({
   }),
   mainChallenge: z
     .string()
-    .min(10, "Please describe your challenge in at least 10 characters")
-    .max(1000, "Description too long"),
+    .min(1, "Please select at least one challenge"),
 });
 
 export type AuditFormInput = z.infer<typeof auditFormSchema>;

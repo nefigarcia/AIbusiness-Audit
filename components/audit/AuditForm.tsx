@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Loader2, Phone, Mail, Building, User, ChevronRight } from "lucide-react";
+import { Loader2, Phone, Mail, Building, User, ChevronRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { submitAuditAction } from "@/actions/audit";
@@ -28,20 +28,40 @@ const companySizes = [
   { value: "ENTERPRISE", label: "200+ employees" },
 ];
 
+const challenges = [
+  { emoji: "📞", label: "Missed calls & leads" },
+  { emoji: "⏱", label: "Slow lead response" },
+  { emoji: "📅", label: "Manual scheduling" },
+  { emoji: "🔁", label: "Repetitive admin tasks" },
+  { emoji: "🎧", label: "Customer support overload" },
+  { emoji: "📋", label: "Inconsistent follow-ups" },
+  { emoji: "💾", label: "No CRM or disorganized data" },
+  { emoji: "📉", label: "Losing jobs to competitors" },
+];
+
 function FieldError({ error }: { error?: string[] }) {
   if (!error?.length) return null;
-  return <p className="mt-1 text-xs text-red-400">{error[0]}</p>;
+  return <p className="mt-1.5 text-xs text-red-400">{error[0]}</p>;
 }
 
 export function AuditForm() {
   const [state, formAction, pending] = useActionState(submitAuditAction, initialState);
   const router = useRouter();
+  const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
     if (state.success && state.sessionId) {
       router.push(`/audit/success?session=${state.sessionId}`);
     }
   }, [state.success, state.sessionId, router]);
+
+  function toggleChip(label: string) {
+    setSelected((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+  }
+
+  const challengeValue = selected.join(", ");
 
   return (
     <motion.div
@@ -56,6 +76,7 @@ export function AuditForm() {
       )}
 
       <form action={formAction} className="space-y-5">
+        {/* Name + Business */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-white/70 mb-1.5">
@@ -86,6 +107,7 @@ export function AuditForm() {
           </div>
         </div>
 
+        {/* Email + Phone */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-white/70 mb-1.5">
@@ -118,6 +140,7 @@ export function AuditForm() {
           </div>
         </div>
 
+        {/* Industry + Company size */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-white/70 mb-1.5">
@@ -162,16 +185,45 @@ export function AuditForm() {
           </div>
         </div>
 
+        {/* Challenge chips */}
         <div>
-          <label className="block text-sm font-medium text-white/70 mb-1.5">
-            Biggest Operational Challenge
+          <label className="block text-sm font-medium text-white/70 mb-3">
+            Where are you losing the most time or money?
+            <span className="ml-2 text-white/30 font-normal text-xs">Select all that apply</span>
           </label>
-          <textarea
-            name="mainChallenge"
-            rows={4}
-            placeholder="Describe your biggest operational challenge or bottleneck. What's costing you the most time or money right now?"
-            className="flex w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 transition-colors hover:border-white/20 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 resize-none"
-          />
+
+          <div className="grid grid-cols-2 gap-2">
+            {challenges.map(({ emoji, label }) => {
+              const isSelected = selected.includes(label);
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => toggleChip(label)}
+                  className={`
+                    relative flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-sm font-medium
+                    transition-all duration-150 text-left
+                    ${isSelected
+                      ? "bg-violet-500/15 border-violet-500/50 text-violet-200"
+                      : "bg-white/[0.03] border-white/10 text-white/50 hover:border-white/20 hover:text-white/80"
+                    }
+                  `}
+                >
+                  <span className="text-base leading-none">{emoji}</span>
+                  <span className="leading-tight">{label}</span>
+                  {isSelected && (
+                    <span className="absolute top-1.5 right-1.5">
+                      <Check className="w-3 h-3 text-violet-400" />
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Hidden input carries the value to the server action */}
+          <input type="hidden" name="mainChallenge" value={challengeValue} />
+
           <FieldError error={state.errors?.mainChallenge} />
         </div>
 
