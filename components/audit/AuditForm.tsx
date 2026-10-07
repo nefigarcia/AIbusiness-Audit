@@ -50,10 +50,19 @@ export function AuditForm() {
   const [selected, setSelected] = useState<string[]>([]);
 
   useEffect(() => {
-    if (state.success && state.sessionId) {
-      router.push(`/audit/success?session=${state.sessionId}`);
-    }
-  }, [state.success, state.sessionId, router]);
+  if (!state.success || !state.sessionId) return;
+
+  // Track successful audit submission as a Meta Lead
+  if (
+    typeof window !== "undefined" &&
+    typeof window.fbq === "function"
+  ) {
+    window.fbq("track", "Lead");
+  }
+
+  // Continue to the success page
+  router.push(`/audit/success?session=${state.sessionId}`);
+}, [state.success, state.sessionId, router]);
 
   function toggleChip(label: string) {
     setSelected((prev) =>
