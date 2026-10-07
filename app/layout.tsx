@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import { Suspense } from "react";
+import { MetaPixel } from "@/components/analytics/MetaPixel";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +44,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable}`}
       >
         <body className="min-h-screen bg-[#0a0a0f] text-white antialiased">
+          <Suspense>
+            <MetaPixel />
+          </Suspense>
           {children}
           <Analytics />
         </body>
